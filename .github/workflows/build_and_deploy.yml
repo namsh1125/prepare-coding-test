@@ -1,0 +1,56 @@
+name: Build and Deploy
+
+on:
+  release:
+    types: [ published ]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Set secret.yml file
+        run: |
+          echo "$SECRET_YML_CONTENT" > ./src/main/resources/secret.yml
+        env:
+          SECRET_YML_CONTENT: ${{ secrets.SECRET_YML }}
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew bootJar
+        env:
+          APP_VERSION: ${{ github.event.release.tag_name }}
+
+      - name: Build Docker image
+        run: docker build -t spring-app:${{ github.event.release.tag_name }} .
+
+      - name: Stop and remove existing container
+        run: |
+          docker stop server || true
+          docker rm server || true
+          docker rmi spring-app:latest || true
+
+      - name: Start application with Docker
+        run: |
+          docker run -d \
+            --name server \
+            -p 80:8080 \
+            -e APP_VERSION=${{ github.event.release.tag_name }} \
+            spring-app:${{ github.event.release.tag_name }}
+
+      - name: Tag as latest
+        run: docker tag spring-app:${{ github.event.release.tag_name }} spring-app:latest
