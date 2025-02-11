@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.woorifisa.codingtest.dto.ProblemDto;
 import site.woorifisa.codingtest.entity.DailyProblem;
 import site.woorifisa.codingtest.entity.Problem;
 import site.woorifisa.codingtest.repository.DailyProblemRepository;
@@ -38,6 +39,17 @@ public class ProblemService {
         dailyProblemRepository.save(dailyProblem);
 
         SlackUtil.sendDailyProblemNotification(webhookUrl, problem);
+    }
+
+    @Transactional(readOnly = true)
+    public ProblemDto getTodayProblem() {
+        Problem problem = dailyProblemRepository.findCurrentProblem()
+                .map(DailyProblem::getProblem)
+                .orElseThrow(() -> new RuntimeException("Current problem not found"));
+
+        SlackUtil.sendDailyProblemNotification(webhookUrl, problem);
+
+        return new ProblemDto(problem);
     }
 
 }
