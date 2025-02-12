@@ -28,7 +28,7 @@ public class SlackUtil {
         }
     }
 
-    private static String createDailyProblemMessage(Problem problem) {
+    public static String createDailyProblemMessage(Problem problem) {
         return String.format("""
                         {
                             "blocks": [

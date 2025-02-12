@@ -18,8 +18,8 @@ public class ProblemController {
     @PostMapping("/today")
     public ResponseEntity<SlackResponseDto> getTodayProblem() {
         try {
-            problemService.getTodayProblem();
-            return ResponseEntity.ok(SlackResponseDto.success("오늘의 문제가 성공적으로 조회되었습니다!"));
+            SlackResponseDto response = problemService.getTodayProblem();
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             return ResponseEntity.ok(SlackResponseDto.error("조회에 실패하였습니다: " + e.getMessage()));

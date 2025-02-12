@@ -29,7 +29,7 @@ public class MemberController {
             return ResponseEntity.ok(SlackResponseDto.success(String.format("%s님 등록이 완료되었습니다!", userName)));
 
         } catch (MemberAlreadyExistsException e) {
-            return ResponseEntity.ok(SlackResponseDto.error("멤버가 존재하여 더 이상 등록할 수 없습니다."));
+            return ResponseEntity.ok(SlackResponseDto.error("이미 등록된 사용자입니다."));
 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.ok(SlackResponseDto.error(String.format("등록에 실패하였습니다: %s", e.getMessage())));
