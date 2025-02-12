@@ -11,6 +11,7 @@ import site.woorifisa.codingtest.repository.DailyProblemRepository;
 import site.woorifisa.codingtest.repository.MemberRepository;
 import site.woorifisa.codingtest.repository.SubmissionRepository;
 import site.woorifisa.codingtest.util.SlackUtil;
+import site.woorifisa.codingtest.exception.*;
 
 @Service
 @RequiredArgsConstructor
@@ -28,13 +29,13 @@ public class SubmissionService {
     @Transactional
     public void submitSolution(String slackId, String submissionUrl) {
         Member member = memberRepository.findBySlackId(slackId)
-                .orElseThrow(() -> new RuntimeException("Member not found"));
+                .orElseThrow(() -> new UnregisteredMemberException("등록된 사용자 정보가 없습니다. '/register' 명령어를 통해 먼저 등록해주세요."));
 
         DailyProblem currentProblem = dailyProblemRepository.findCurrentProblem()
-                .orElseThrow(() -> new RuntimeException("Current problem not found"));
+                .orElseThrow(() -> new NoDailyProblemException("현재 진행중인 문제가 없습니다."));
 
         if (submissionRepository.existsByMemberAndDailyProblem(member, currentProblem)) {
-            throw new IllegalStateException("이미 제출한 문제입니다.");
+            throw new DuplicateSubmissionException("이미 제출한 문제입니다.");
         }
 
         Submission submission = Submission.builder()
