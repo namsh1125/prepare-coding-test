@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import site.woorifisa.codingtest.dto.SlackResponseDto;
+import site.woorifisa.codingtest.entity.Problem;
 import site.woorifisa.codingtest.service.ProblemService;
 
 @RestController
@@ -18,9 +19,10 @@ public class ProblemController {
     @PostMapping("/today")
     public ResponseEntity<SlackResponseDto> getTodayProblem() {
         try {
-            problemService.getTodayProblem();
-            return ResponseEntity.ok(SlackResponseDto.success("오늘의 문제가 성공적으로 조회되었습니다!"));
+            Problem problem = problemService.getTodayProblem();
+            String message = String.format("오늘 해결해야 하는 문제는 [%s](%s)입니다.", problem.getTitle(), problem.getUrl());
 
+            return ResponseEntity.ok(SlackResponseDto.success(message));
         } catch (Exception e) {
             return ResponseEntity.ok(SlackResponseDto.error("조회에 실패하였습니다: " + e.getMessage()));
         }

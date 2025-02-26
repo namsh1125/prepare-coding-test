@@ -41,12 +41,10 @@ public class ProblemService {
     }
 
     @Transactional(readOnly = true)
-    public void getTodayProblem() {
-        Problem problem = dailyProblemRepository.findCurrentProblem()
+    public Problem getTodayProblem() {
+        return dailyProblemRepository.findCurrentProblem()
                 .map(DailyProblem::getProblem)
                 .orElseThrow(() -> new RuntimeException("Current problem not found"));
-
-        SlackUtil.sendDailyProblemNotification(webhookUrl, problem);
     }
 
 }
